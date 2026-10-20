@@ -55,13 +55,13 @@ sudo apt install -y mariadb-server python3-flask python3-pymysql
 
 ```bash
 U=$(whoami)
-sudo mariadb -e "CREATE DATABASE inventario; CREATE USER '$U'@'localhost' IDENTIFIED VIA unix_socket; GRANT ALL ON inventario.* TO '$U'@'localhost'; CREATE TABLE inventario.equipos(nombre VARCHAR(50)); INSERT INTO inventario.equipos VALUES('Ordenador 1');"
+sudo mariadb -e "CREATE DATABASE avisos; CREATE USER '$U'@'localhost' IDENTIFIED VIA unix_socket; GRANT ALL ON avisos.* TO '$U'@'localhost'; CREATE TABLE avisos.avisos(texto VARCHAR(100)); INSERT INTO avisos.avisos VALUES('Mantenimiento programado');"
 ```
 
 Comprueba:
 
 ```bash
-mariadb inventario -e "SELECT * FROM equipos;"
+mariadb avisos -e "SELECT * FROM avisos;"
 ```
 
 ### 3. Crear Flask
@@ -81,11 +81,11 @@ app=Flask(__name__)
 
 @app.route('/')
 def inicio():
-    db=pymysql.connect(unix_socket='/run/mysqld/mysqld.sock',user=getpass.getuser(),database='inventario')
+    db=pymysql.connect(unix_socket='/run/mysqld/mysqld.sock',user=getpass.getuser(),database='avisos')
     c=db.cursor()
-    c.execute('SELECT nombre FROM equipos')
-    equipos=', '.join(x[0] for x in c.fetchall())
-    return '<h1>Infraestructura Informatica para CPD</h1><p>'+os.getenv('NOMBRE')+'</p><p>IP: '+os.getenv('IP')+'</p><p>MV3 - Flask y MariaDB</p><p>Equipos: '+equipos+'</p>'
+    c.execute('SELECT texto FROM avisos')
+    avisos=', '.join(x[0] for x in c.fetchall())
+    return '<h1>Tablon de avisos del CPD</h1><p>'+os.getenv('NOMBRE')+'</p><p>IP: '+os.getenv('IP')+'</p><p>MV3 - Flask y MariaDB</p><p>Avisos: '+avisos+'</p>'
 
 app.run(host='0.0.0.0',port=5000)
 ```
@@ -119,6 +119,6 @@ Debes ver:
 
 - MV1: asignatura, nombre, IP y MV1.
 - MV2: asignatura, nombre, IP y MV2.
-- MV3: asignatura, nombre, IP, MV3 y `Ordenador 1` leído desde MariaDB.
+- MV3: nombre, IP, MV3 y `Mantenimiento programado` leído desde MariaDB.
 
-Haz una captura de cada página y otra del comando `SELECT * FROM equipos;`.
+Haz una captura de cada página y otra del comando `SELECT * FROM avisos;`.
