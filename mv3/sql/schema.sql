@@ -1,0 +1,17 @@
+CREATE TABLE IF NOT EXISTS equipos (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  nombre VARCHAR(120) NOT NULL,
+  tipo VARCHAR(50) NOT NULL,
+  marca VARCHAR(80) NOT NULL,
+  modelo VARCHAR(120) NOT NULL,
+  numero_serie VARCHAR(120) NULL,
+  estado VARCHAR(30) NOT NULL DEFAULT 'Operativo',
+  ubicacion VARCHAR(120) NOT NULL,
+  ip_address VARCHAR(45) NULL,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_equipos_numero_serie (numero_serie),
+  KEY ix_equipos_nombre (nombre)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

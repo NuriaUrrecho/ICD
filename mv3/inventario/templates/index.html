@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="hero py-5">
+  <div class="container py-4">
+    <div class="row align-items-end g-4">
+      <div class="col-lg-8"><span class="badge rounded-pill mb-3">MV3 · Servicio activo</span><h1>Inventario<br>informático.</h1><p>Infraestructura Informática para Centros de Procesamiento de Datos</p></div>
+      <div class="col-lg-4"><div class="identity"><small>ESTUDIANTE</small><strong>{{ student }}</strong><small>DIRECCIÓN IP</small><strong>{{ server_ip }}</strong></div></div>
+    </div>
+  </div>
+</header>
+<main class="container py-5">
+  <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <form class="search d-flex" method="get"><input class="form-control" type="search" name="q" value="{{ query }}" placeholder="Buscar por nombre, marca, serie..."><button class="btn btn-dark">Buscar</button>{% if query %}<a class="btn btn-link" href="{{ url_for('web.index') }}">Limpiar</a>{% endif %}</form>
+    <a class="btn btn-accent" href="{{ url_for('web.crear_equipo') }}">+ Registrar equipo</a>
+  </div>
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0"><thead><tr><th>Equipo</th><th>Tipo</th><th>Estado</th><th>Ubicación / IP</th><th class="text-end">Acciones</th></tr></thead>
+      <tbody>
+      {% for equipo in equipos %}
+        <tr><td><strong>{{ equipo.nombre }}</strong><small>{{ equipo.marca }} {{ equipo.modelo }}{% if equipo.numero_serie %} · {{ equipo.numero_serie }}{% endif %}</small></td><td>{{ equipo.tipo }}</td><td><span class="state state-{{ equipo.estado|lower }}">{{ equipo.estado }}</span></td><td>{{ equipo.ubicacion }}<small>{{ equipo.ip_address or 'Sin IP' }}</small></td><td class="text-end"><a class="btn btn-sm btn-outline-dark" href="{{ url_for('web.editar_equipo', equipo_id=equipo.id) }}">Editar</a><form class="d-inline" method="post" action="{{ url_for('web.eliminar_equipo', equipo_id=equipo.id) }}" onsubmit="return confirm('¿Eliminar este equipo?')"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-danger">Eliminar</button></form></td></tr>
+      {% else %}
+        <tr><td colspan="5" class="empty text-center py-5">{% if query %}No hay resultados para “{{ query }}”.{% else %}Todavía no hay equipos. Registra el primero.{% endif %}</td></tr>
+      {% endfor %}
+      </tbody></table>
+    </div>
+  </div>
+</main>
+{% endblock %}
+

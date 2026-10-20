@@ -1,0 +1,17 @@
+:root { --navy:#101a2d; --cream:#f7f4ed; --cyan:#3dd6c5; --orange:#ff6b45; }
+body { background:var(--cream); color:var(--navy); font-family:Inter,Segoe UI,sans-serif; }
+.navbar { background:var(--navy); }
+.navbar-brand span { color:var(--cyan); }
+.hero { color:white; background:linear-gradient(125deg,#101a2d 0%,#162b4c 70%,#174950 100%); }
+.hero h1 { font-size:clamp(3.8rem,8vw,7.5rem); line-height:.82; letter-spacing:-.07em; font-weight:800; }
+.hero p { color:#b8c5d8; margin-top:1.5rem; font-size:1.1rem; }
+.hero .badge { color:#bffbf3; background:#19433f; border:1px solid #2b756c; }
+.identity { display:grid; gap:.25rem; padding:1.5rem; border:1px solid #44556e; border-radius:18px; background:#ffffff0d; }
+.identity small { color:var(--cyan); margin-top:.7rem; letter-spacing:.12em; }.identity strong { overflow-wrap:anywhere; }
+.search { max-width:650px; flex:1; }.search .form-control { border-radius:12px 0 0 12px; }.search .btn-dark { border-radius:0 12px 12px 0; }
+.btn-accent { color:white; background:var(--orange); border:0; border-radius:12px; padding:.72rem 1.15rem; font-weight:700; }.btn-accent:hover { color:white; background:#e55634; }
+.table-card,.form-card { overflow:hidden; background:white; border:1px solid #ddd8ce; border-radius:20px; box-shadow:0 12px 40px #1b29400d; }
+.table thead th { padding:1rem 1.2rem; color:#6b7280; background:#f0ede6; font-size:.75rem; letter-spacing:.08em; text-transform:uppercase; }.table td { padding:1.1rem 1.2rem; }.table td small { display:block; color:#747a84; }
+.state { display:inline-block; padding:.35rem .65rem; border-radius:99px; background:#e8edf2; font-size:.78rem; font-weight:700; }.state-operativo { color:#08735d; background:#d9f5ed; }.state-mantenimiento { color:#9a5700; background:#fff0cc; }.state-retirado { color:#8e2930; background:#f9dfe1; }
+.form-card { padding:clamp(1.5rem,5vw,3.5rem); }.form-card h1 { font-size:clamp(2.4rem,6vw,4.5rem); letter-spacing:-.05em; }.overline,.back { color:#64748b; font-size:.78rem; letter-spacing:.12em; font-weight:700; text-decoration:none; }.form-control,.form-select { padding:.75rem; border-radius:10px; }.form-label { font-weight:700; }
+

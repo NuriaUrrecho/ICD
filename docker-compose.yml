@@ -1,0 +1,68 @@
+services:
+  mv1:
+    build: ./mv1
+    environment:
+      STUDENT_NAME: ${STUDENT_NAME:-Nombre configurable}
+      SERVER_IP: ${MV1_IP:-localhost:8081}
+    ports:
+      - "8081:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/ | grep -q 'MV1'"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  mv2:
+    build: ./mv2
+    environment:
+      STUDENT_NAME: ${STUDENT_NAME:-Nombre configurable}
+      SERVER_IP: ${MV2_IP:-localhost:8082}
+    ports:
+      - "8082:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/ | grep -q 'MV2'"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  db:
+    image: mariadb:11.4
+    environment:
+      MARIADB_DATABASE: ${DB_NAME:-inventario}
+      MARIADB_USER: ${DB_USER:-inventario_app}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Copia .env.compose.example como .env y define DB_PASSWORD}
+      MARIADB_RANDOM_ROOT_PASSWORD: "yes"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./mv3/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh --connect --innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mv3:
+    build: ./mv3
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: ${DB_NAME:-inventario}
+      DB_USER: ${DB_USER:-inventario_app}
+      DB_PASSWORD: ${DB_PASSWORD:?Copia .env.compose.example como .env y define DB_PASSWORD}
+      SECRET_KEY: ${SECRET_KEY:?Copia .env.compose.example como .env y define SECRET_KEY}
+      STUDENT_NAME: ${STUDENT_NAME:-Nombre configurable}
+      SERVER_IP: ${MV3_IP:-localhost:5000}
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/api/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mariadb_data:
+
