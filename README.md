@@ -11,6 +11,7 @@ Incluye:
 - `GUIA_WINDOWS.md`: ejecución y validación en Windows 11.
 - `GUIA_LABORATORIO.md`: despliegue posterior en Proxmox VE sin asumir datos de red.
 - `TARJETA_45_MIN.md`: versión mínima para trabajar sin copiar y pegar.
+- `GUIA_TODO_A_MANO_45_MIN.md`: alternativa ultracorta cuando no se puede descargar ningún archivo.
 - `instalar.sh`: lanzador único para las tres máquinas.
 
 ## Prueba rápida con Docker
