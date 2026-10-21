@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Tablón de Avisos del CPD{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="{{ url_for('web.index') }}">CPD<span>/AVISOS</span></a>
+      <span class="service"><i></i> MV3 · Flask + MariaDB</span>
+    </div>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container messages">
+        {% for category, message in messages %}<p class="message {{ category }}">{{ message }}</p>{% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+  <footer class="container">Práctica 4 · Infraestructura Informática para Centros de Procesamiento de Datos · UPV</footer>
+</body>
+</html>

@@ -7,42 +7,37 @@ function Confirmar($condicion, $mensaje) {
 }
 
 Write-Host "Probando $BaseUrl"
-$health = Invoke-RestMethod "$BaseUrl/api/health"
+$health = Invoke-RestMethod "$BaseUrl/health"
 Confirmar ($health.status -eq "ok" -and $health.database -eq "connected") "Flask responde y MariaDB está conectada"
 
-$serial = "TEST-$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())"
 $body = @{
-    nombre = "Portátil de validación"
-    tipo = "Portátil"
-    marca = "Lenovo"
-    modelo = "ThinkPad"
-    numero_serie = $serial
-    estado = "Operativo"
-    ubicacion = "Laboratorio"
-    ip_address = "192.0.2.25"
+    titulo = "Aviso automatizado $([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())"
+    descripcion = "Aviso temporal creado por la prueba CRUD"
+    categoria = "Mantenimiento"
+    prioridad = "Media"
 } | ConvertTo-Json
 
-$created = Invoke-RestMethod "$BaseUrl/api/equipos" -Method Post -ContentType "application/json" -Body $body
-Confirmar ($created.id -gt 0 -and $created.numero_serie -eq $serial) "CREATE devuelve 201 y el equipo creado"
+$created = Invoke-RestMethod "$BaseUrl/api/avisos" -Method Post -ContentType "application/json" -Body $body
+Confirmar ($created.id -gt 0 -and $created.categoria -eq "Mantenimiento") "CREATE publica un aviso"
 $id = $created.id
 
-$read = Invoke-RestMethod "$BaseUrl/api/equipos/$id"
-Confirmar ($read.nombre -eq "Portátil de validación") "READ recupera el equipo"
+$read = Invoke-RestMethod "$BaseUrl/api/avisos/$id"
+Confirmar ($read.titulo -like "Aviso automatizado*") "READ recupera el aviso"
 
-$patch = @{ estado = "Mantenimiento" } | ConvertTo-Json
-$updated = Invoke-RestMethod "$BaseUrl/api/equipos/$id" -Method Patch -ContentType "application/json" -Body $patch
-Confirmar ($updated.estado -eq "Mantenimiento") "UPDATE modifica el estado"
+$patch = @{ prioridad = "Alta" } | ConvertTo-Json
+$updated = Invoke-RestMethod "$BaseUrl/api/avisos/$id" -Method Patch -ContentType "application/json" -Body $patch
+Confirmar ($updated.prioridad -eq "Alta") "UPDATE modifica la prioridad"
 
-$search = Invoke-RestMethod "$BaseUrl/api/equipos?q=$serial"
-Confirmar ($search.total -eq 1) "El buscador encuentra el número de serie"
+$filtered = Invoke-RestMethod "$BaseUrl/api/avisos?prioridad=Alta"
+Confirmar (@($filtered.items | Where-Object { $_.id -eq $id }).Count -eq 1) "El filtro encuentra el aviso actualizado"
 
-Invoke-RestMethod "$BaseUrl/api/equipos/$id" -Method Delete | Out-Null
+Invoke-RestMethod "$BaseUrl/api/avisos/$id" -Method Delete | Out-Null
 try {
-    Invoke-RestMethod "$BaseUrl/api/equipos/$id" | Out-Null
-    throw "FALLO: DELETE no eliminó el equipo"
+    Invoke-RestMethod "$BaseUrl/api/avisos/$id" | Out-Null
+    throw "FALLO: DELETE no eliminó el aviso"
 } catch {
     if ($_.Exception.Response.StatusCode.value__ -ne 404) { throw }
 }
-Write-Host "OK  DELETE elimina el equipo y una lectura posterior devuelve 404" -ForegroundColor Green
+Write-Host "OK  DELETE elimina el aviso y una lectura posterior devuelve 404" -ForegroundColor Green
 Write-Host "Todas las pruebas CRUD han pasado." -ForegroundColor Cyan
 

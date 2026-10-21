@@ -1,27 +1,37 @@
-# Pruebas desde Windows 11
+# Pruebas completas en Windows 11
 
-## Opción recomendada: Docker Desktop
+Esta fase no necesita Proxmox. Docker crea cuatro contenedores locales: dos Apache, Flask y MariaDB.
 
-### 1. Preparación
+## 1. Instalar Docker Desktop
 
-1. Instala Docker Desktop para Windows y usa contenedores Linux (backend WSL 2).
-2. Abre PowerShell en la raíz del proyecto.
-3. Crea la configuración local:
+1. Instala Docker Desktop para Windows.
+2. Activa el backend WSL 2 y los contenedores Linux.
+3. Abre Docker Desktop y espera a que indique que el motor está iniciado.
+4. Abre PowerShell en la carpeta del proyecto.
 
-   ```powershell
-   Copy-Item .env.compose.example .env
-   notepad .env
-   ```
+Comprueba la instalación:
 
-4. Sustituye `STUDENT_NAME`, las tres IP descriptivas, `DB_PASSWORD` y `SECRET_KEY`. Para generar una clave segura:
+```powershell
+docker version
+docker compose version
+```
 
-   ```powershell
-   python -c "import secrets; print(secrets.token_hex(32))"
-   ```
+## 2. Configurar secretos locales
 
-   En casa las IP pueden ser etiquetas como `localhost:8081`; en el laboratorio usa las IP asignadas. El archivo `.env` está excluido de Git.
+```powershell
+Copy-Item .env.compose.example .env
+notepad .env
+```
 
-### 2. Arranque
+En `.env` escribe tu nombre y sustituye `DB_PASSWORD` y `SECRET_KEY`. Puedes generar la clave de Flask así:
+
+```powershell
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+No subas `.env` a GitHub.
+
+## 3. Construir y arrancar
 
 ```powershell
 docker compose config
@@ -29,67 +39,49 @@ docker compose up --build -d
 docker compose ps
 ```
 
-Espera hasta que `db`, `mv1`, `mv2` y `mv3` aparezcan como `healthy`. Si un contenedor falla, consulta `docker compose logs --tail 100 nombre_del_servicio`.
+Espera hasta que `mv1`, `mv2`, `db` y `mv3` aparezcan como `healthy`.
 
-Servicios locales:
+Abre:
 
-| Servicio | URL | Resultado esperado |
-|---|---|---|
-| Apache simulado MV1 | <http://localhost:8081> | Diseño azul, estudiante, IP y “MV1 · Apache” |
-| Apache simulado MV2 | <http://localhost:8082> | Diseño claro distinto, estudiante, IP y “MV2” |
-| Flask MV3 | <http://localhost:5000> | Inventario en español y datos de estudiante/IP |
-| Estado MV3 | <http://localhost:5000/api/health> | `{"database":"connected","status":"ok"}` |
+- <http://localhost:8081> - Apache de MV1.
+- <http://localhost:8082> - Apache de MV2.
+- <http://localhost:5000> - Tablón Flask.
+- <http://localhost:5000/health> - conexión real con MariaDB.
+- <http://localhost:5000/api/avisos> - datos JSON.
 
-Nginx se usa únicamente como sustituto ligero de Apache en la prueba doméstica de las páginas estáticas. Los instaladores del laboratorio sí usan Apache.
+## 4. Probar la interfaz
 
-### 3. CRUD web
+1. Publica un aviso con título, descripción, categoría y prioridad.
+2. Comprueba que aparece con fecha y etiqueta de prioridad.
+3. Filtra por categoría y prioridad.
+4. Actualiza la página: el aviso debe persistir en MariaDB.
+5. Elimina el aviso y confirma que desaparece.
+6. Intenta enviar campos vacíos: debe aparecer un mensaje de error.
 
-1. En MV3, pulsa **Registrar equipo**.
-2. Completa todos los campos obligatorios y guarda.
-3. Busca el equipo por nombre, marca, modelo, serie o ubicación.
-4. Edita su estado y verifica el cambio.
-5. Elimínalo y confirma que desaparece.
-6. Prueba una IP inválida y un número de serie repetido: la aplicación debe rechazarlos.
-
-### 4. API REST automatizada
+## 5. Ejecutar la prueba CRUD de la API
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\pruebas\probar_api.ps1
 ```
 
-El script crea un equipo temporal, lo lee, actualiza, busca y elimina. Debe terminar con “Todas las pruebas CRUD han pasado”. Para probar una MV real:
+El script crea, consulta, actualiza, filtra y elimina un aviso temporal. Debe terminar con `Todas las pruebas CRUD han pasado`.
 
-```powershell
-.\pruebas\probar_api.ps1 -BaseUrl http://IP_MV3:5000
-```
+## 6. Comprobar MariaDB directamente
 
-Endpoints disponibles:
-
-| Método | Ruta | Función |
-|---|---|---|
-| GET | `/api/health` | Salud de Flask y conexión SQL |
-| GET | `/api/equipos?q=texto` | Listar y buscar |
-| POST | `/api/equipos` | Crear |
-| GET | `/api/equipos/<id>` | Consultar uno |
-| PUT / PATCH | `/api/equipos/<id>` | Sustituir / modificar |
-| DELETE | `/api/equipos/<id>` | Eliminar |
-
-### 5. Conexión directa a MariaDB
-
-El endpoint `/api/health` ya ejecuta `SELECT 1`. Para una segunda comprobación dentro del contenedor, carga la contraseña desde `.env` en la sesión y ejecuta el cliente sin imprimirla:
+El endpoint `/health` ejecuta una consulta SQL. Como comprobación adicional:
 
 ```powershell
 $line = Get-Content .env | Where-Object { $_ -match '^DB_PASSWORD=' }
 $env:DB_PASSWORD = $line.Substring('DB_PASSWORD='.Length)
-docker compose exec -e MYSQL_PWD=$env:DB_PASSWORD db mariadb -u inventario_app inventario -e "SELECT 1; SELECT COUNT(*) AS equipos FROM equipos;"
+docker compose exec -e MYSQL_PWD=$env:DB_PASSWORD db mariadb -u avisos_app cpd_avisos -e "SELECT COUNT(*) AS avisos FROM avisos;"
 Remove-Item Env:DB_PASSWORD
 ```
 
-Si cambiaste `DB_USER` o `DB_NAME`, sustitúyelos en el comando. Se esperan dos resultados sin errores y una tabla `equipos` accesible.
+Si cambiaste `DB_USER` o `DB_NAME`, adapta el comando.
 
-### 6. Pruebas Python aisladas
+## 7. Pruebas Python aisladas
 
-Estas pruebas usan SQLite temporal y no requieren MariaDB; verifican rutas, validación y CRUD de la API:
+Estas pruebas utilizan una base SQLite temporal para comprobar rutas y validación, sin sustituir la prueba real con MariaDB:
 
 ```powershell
 cd mv3
@@ -97,34 +89,32 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements-dev.txt
 python -m pytest -q
+deactivate
 cd ..
 ```
 
-Para incluir la prueba real de MariaDB, define una URL de prueba antes de ejecutar `pytest` (no la guardes en Git):
+## 8. Diagnóstico
 
 ```powershell
-$env:MARIADB_TEST_URL = "mysql+pymysql://USUARIO:CONTRASENA@127.0.0.1:3306/inventario"
-python -m pytest -q
-Remove-Item Env:MARIADB_TEST_URL
+docker compose ps
+docker compose logs --tail 100 mv3
+docker compose logs --tail 100 db
+docker compose config
 ```
 
-### 7. Parada y limpieza
+Si cambiaste el esquema y conservas datos antiguos, reinicia deliberadamente la base:
 
-`docker compose down` detiene el entorno y conserva los datos. `docker compose down -v` elimina también el volumen de MariaDB; úsalo solo si quieres reiniciar deliberadamente la base de datos.
+```powershell
+docker compose down -v
+docker compose up --build -d
+```
 
-## Matriz de resultados esperados
+`down -v` elimina el volumen local de MariaDB; no lo uses si necesitas conservar sus datos.
 
-| Prueba | Resultado correcto |
-|---|---|
-| Contenedores | Cuatro servicios `healthy` |
-| Portadas | HTTP 200, estilos distintos, datos configurados |
-| Salud API | HTTP 200 y `database: connected` |
-| Alta | HTTP 201 y objeto con `id` |
-| Lectura/listado | HTTP 200 y datos creados |
-| Edición | HTTP 200 y campos modificados |
-| Búsqueda | Solo coincidencias; `total` correcto |
-| Eliminación | HTTP 204; consulta posterior HTTP 404 |
-| Validación | HTTP 400 para datos/IP inválidos |
-| Serie duplicada | HTTP 409 |
-| MariaDB directa | `SELECT 1` devuelve `1` |
+## 9. Parar el entorno
 
+```powershell
+docker compose down
+```
+
+Este comando conserva la base de datos. Para volver a arrancar: `docker compose up -d`.

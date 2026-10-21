@@ -10,16 +10,15 @@ csrf = CSRFProtect()
 
 
 def _database_uri():
-    explicit = os.getenv("DATABASE_URL")
-    if explicit:
+    if explicit := os.getenv("DATABASE_URL"):
         return explicit
     return URL.create(
         "mysql+pymysql",
-        username=os.getenv("DB_USER", "inventario_app"),
+        username=os.getenv("DB_USER", "avisos_app"),
         password=os.getenv("DB_PASSWORD"),
         host=os.getenv("DB_HOST", "127.0.0.1"),
         port=int(os.getenv("DB_PORT", "3306")),
-        database=os.getenv("DB_NAME", "inventario"),
+        database=os.getenv("DB_NAME", "cpd_avisos"),
         query={"charset": "utf8mb4"},
     )
 
@@ -49,4 +48,3 @@ def create_app(test_config=None):
     with app.app_context():
         db.create_all()
     return app
-

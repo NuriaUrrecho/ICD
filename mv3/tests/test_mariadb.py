@@ -9,3 +9,4 @@ def test_mariadb_connection():
     engine = create_engine(os.environ["MARIADB_TEST_URL"])
     with engine.connect() as connection:
         assert connection.execute(text("SELECT 1")).scalar_one() == 1
+        assert connection.execute(text("SELECT COUNT(*) FROM avisos")).scalar_one() >= 0

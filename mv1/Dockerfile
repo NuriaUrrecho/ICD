@@ -1,6 +1,7 @@
-FROM nginx:1.27-alpine
+FROM httpd:2.4-alpine
 COPY index.html /opt/site/index.html
-COPY style.css /usr/share/nginx/html/style.css
-COPY docker-configure.sh /docker-entrypoint.d/40-configure.sh
-RUN chmod 755 /docker-entrypoint.d/40-configure.sh
+COPY style.css /usr/local/apache2/htdocs/style.css
+COPY docker-configure.sh /opt/configure.sh
+RUN chmod 755 /opt/configure.sh
+CMD ["/opt/configure.sh"]
 

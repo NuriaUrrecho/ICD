@@ -7,4 +7,6 @@ venv/
 instance/
 *.log
 .DS_Store
+tmp/
+output/
 

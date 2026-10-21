@@ -1,0 +1,21 @@
+[Unit]
+Description=Tablon de Avisos del CPD (Flask + MariaDB)
+After=network-online.target mariadb.service
+Wants=network-online.target
+Requires=mariadb.service
+
+[Service]
+Type=simple
+User=tablon
+Group=tablon
+WorkingDirectory=/opt/tablon-cpd
+EnvironmentFile=/etc/tablon-cpd.env
+ExecStart=/opt/tablon-cpd/venv/bin/gunicorn --workers 2 --bind 0.0.0.0:5000 --access-logfile - app:app
+Restart=on-failure
+RestartSec=5
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

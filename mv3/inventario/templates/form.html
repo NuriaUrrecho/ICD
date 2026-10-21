@@ -1,8 +1,0 @@
-{% extends "base.html" %}
-{% block title %}{{ title }} | Inventario CPD{% endblock %}
-{% block content %}
-<main class="container py-5"><div class="row justify-content-center"><div class="col-lg-8"><a href="{{ url_for('web.index') }}" class="back">← Volver al inventario</a><div class="form-card mt-3"><p class="overline">GESTIÓN DE ACTIVOS</p><h1>{{ title }}</h1><form method="post" novalidate>{{ form.hidden_tag() }}<div class="row g-3 mt-2">
-{% for field in [form.nombre, form.tipo, form.marca, form.modelo, form.numero_serie, form.estado, form.ubicacion, form.ip_address] %}<div class="col-md-6"><label class="form-label" for="{{ field.id }}">{{ field.label.text }}</label>{{ field(class_='form-select' if field.type == 'SelectField' else 'form-control') }}{% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</div>{% endfor %}
-<div class="col-12 mt-4">{{ form.submit(class_='btn btn-accent') }} <a class="btn btn-link" href="{{ url_for('web.index') }}">Cancelar</a></div></div></form></div></div></div></main>
-{% endblock %}
-

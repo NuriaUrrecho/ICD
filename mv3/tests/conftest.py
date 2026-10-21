@@ -1,6 +1,6 @@
 import pytest
 
-from inventario import create_app, db
+from tablon import create_app, db
 
 
 @pytest.fixture()
