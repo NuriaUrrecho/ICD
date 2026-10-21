@@ -18,7 +18,7 @@ done
 html_escape() { local s=$1; s=${s//&/&amp;}; s=${s//</&lt;}; s=${s//>/&gt;}; s=${s//\"/&quot;}; printf '%s' "$s"; }
 SRC_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get install -y apache2
+DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 curl
 install -d -m 0755 /var/www/html
 escaped_student=$(html_escape "$STUDENT_NAME")
 escaped_ip=$(html_escape "$SERVER_IP")

@@ -9,4 +9,10 @@ instance/
 .DS_Store
 tmp/
 output/
+proxmox-local/*.iso
+proxmox-local/*.vdi
+proxmox-local/*.vbox*
+proxmox-local/*.local.*
+proxmox-local/.proxmox-secrets
+proxmox-local/VM/
 
