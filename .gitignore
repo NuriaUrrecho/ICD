@@ -15,4 +15,5 @@ proxmox-local/*.vbox*
 proxmox-local/*.local.*
 proxmox-local/.proxmox-secrets
 proxmox-local/VM/
+proxmox-local/estado-vm.png
 

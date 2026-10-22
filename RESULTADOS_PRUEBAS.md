@@ -1,7 +1,7 @@
 # Resultados de las pruebas locales
 
-**Fecha:** 21/10/2026  
-**Sistema:** Windows 11 con Docker Desktop 4.96.0 y motor Docker 29.9.1
+**Fechas:** 21-22/10/2026
+**Sistemas:** Windows 11 con Docker Desktop 4.96.0 / motor Docker 29.9.1, y Proxmox VE 9.2.2 anidado en VirtualBox.
 
 ## Resultado global
 
@@ -32,14 +32,17 @@ El laboratorio local quedó operativo con los cuatro servicios en estado `health
 
 La prueba Python omitida es una variante opcional que requiere indicar manualmente una URL MariaDB externa. La misma integración se verificó directamente contra el MariaDB real del laboratorio Docker mediante el script CRUD, `/health` y una consulta SQL.
 
-## Pendiente exclusivamente del laboratorio Proxmox
+## Ejecución completada en Proxmox local
 
-No se afirma haber probado fuera de casa lo siguiente:
+Además, se creó y comprobó un entorno Proxmox VE local anidado en VirtualBox, sin utilizar red ni valores de un laboratorio universitario:
 
-- creación y recursos reales de los tres contenedores LXC;
-- MAC, bridge, VLAN, IP, gateway y DNS asignados por el profesor;
-- servicios `systemd` en los contenedores Debian/Ubuntu;
-- comunicación cruzada y reinicio dentro de Proxmox;
-- capturas de pantalla del entorno Proxmox.
+- Proxmox VE 9.2.2 disponible en `https://localhost:8006`.
+- Contenedores LXC Debian 13 reales: `101` (`web1-cpd`), `102` (`web2-cpd`) y `103` (`tablon-cpd`).
+- Red privada `10.10.10.0/24`: `10.10.10.11`, `10.10.10.12` y `10.10.10.13` respectivamente.
+- Apache activo en CT101 y CT102; `tablon-cpd` y MariaDB activos en CT103.
+- Publicación local verificada: MV1 en el puerto `8081`, MV2 en el `8082` y Flask/MariaDB en el `5000`.
+- El script `probar_api.ps1` superó CREATE, READ, UPDATE, filtro y DELETE contra la MariaDB de CT103.
+- Comunicación interna comprobada: CT101→CT102, CT102→CT103 y CT103→CT101.
+- Tras un reinicio normal de Proxmox, los tres CT y sus servicios arrancaron de nuevo; las tres URLs devolvieron HTTP 200.
 
-Estas comprobaciones dependen del acceso al laboratorio y están detalladas en `GUIA_LABORATORIO.md` y `CHECKLIST.md`.
+La configuración real de MAC, bridge, VLAN, IP, gateway y DNS que asigne un profesor, si fuera necesaria en otro entorno, sigue estando documentada en `GUIA_LABORATORIO.md`.
